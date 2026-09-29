@@ -49,6 +49,7 @@ import androidx.compose.ui.semantics.selected
 import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.manga.components.MangaCoverHide
 import eu.kanade.presentation.manga.components.RatioSwitchToPanorama
+import eu.kanade.presentation.components.MangaTreasuryVisuals.mangaTreasuryCard
 import eu.kanade.domain.ui.DoujinCustomisationsPreferences
 import exh.debug.DebugToggles
 import tachiyomi.core.common.preference.PreferenceStore
@@ -137,6 +138,17 @@ fun MangaCompactGridItem(
             "detailed" -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
             else -> Color.Transparent
         },
+        modifier = Modifier.mangaTreasuryCard(
+            effect = when {
+                cardAppearance.treasuryAura != "none" -> cardAppearance.treasuryAura
+                cardAppearance.treasuryBackground != "none" -> cardAppearance.treasuryBackground
+                cardAppearance.treasuryFrame != "none" -> cardAppearance.treasuryFrame
+                else -> cardAppearance.treasuryTheme
+            },
+            intensity = cardAppearance.treasuryIntensity,
+            cornerRadius = cornerRadius.dp,
+            animated = cardAppearance.treasuryAnimations,
+        ),
     ) {
         MangaGridCover(
             modifier = Modifier.fillMaxWidth(coverWidth).then(coverEffectModifier),
@@ -315,6 +327,17 @@ fun MangaComfortableGridItem(
             "detailed" -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
             else -> Color.Transparent
         },
+        modifier = Modifier.mangaTreasuryCard(
+            effect = when {
+                cardAppearance.treasuryAura != "none" -> cardAppearance.treasuryAura
+                cardAppearance.treasuryBackground != "none" -> cardAppearance.treasuryBackground
+                cardAppearance.treasuryFrame != "none" -> cardAppearance.treasuryFrame
+                else -> cardAppearance.treasuryTheme
+            },
+            intensity = cardAppearance.treasuryIntensity,
+            cornerRadius = cornerRadius.dp,
+            animated = cardAppearance.treasuryAnimations,
+        ),
     ) {
         Column {
             MangaGridCover(
@@ -558,6 +581,17 @@ fun MangaListItem(
     Row(
         modifier = Modifier
             .selectedBackground(isSelected)
+            .mangaTreasuryCard(
+                effect = when {
+                cardAppearance.treasuryAura != "none" -> cardAppearance.treasuryAura
+                cardAppearance.treasuryBackground != "none" -> cardAppearance.treasuryBackground
+                cardAppearance.treasuryFrame != "none" -> cardAppearance.treasuryFrame
+                else -> cardAppearance.treasuryTheme
+            },
+                intensity = cardAppearance.treasuryIntensity,
+                cornerRadius = cornerRadius.dp,
+                animated = cardAppearance.treasuryAnimations,
+            )
             .clip(cardShape)
             .shadow(if (cardShadow) 2.dp else 0.dp, cardShape)
             .height(56.dp)

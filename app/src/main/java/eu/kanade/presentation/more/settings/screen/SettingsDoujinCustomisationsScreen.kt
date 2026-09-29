@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import eu.kanade.domain.ui.DoujinCustomisationsPreferences
+import eu.kanade.presentation.components.MangaTreasuryVisuals
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.PreferenceScaffold
 import eu.kanade.presentation.util.Screen
@@ -269,6 +270,26 @@ object SettingsDoujinCustomisationsScreen : SearchableSettings {
                     Preference.PreferenceItem.TextPreference("Apply Glass preset", "Translucent surfaces with restrained transparency.", onClick = { preferences.applyPreset("glass") }),
                     Preference.PreferenceItem.TextPreference("Apply Dynamic preset", "Cover-derived accents and dynamic detail surfaces.", onClick = { preferences.applyPreset("dynamic") }),
                     Preference.PreferenceItem.TextPreference("Reset Appearance", "Reset appearance only; utility and library data remain unchanged.", onClick = preferences::resetAppearance),
+                ),
+            ),
+            Preference.PreferenceGroup(
+                title = "Manga Treasury — all effects available",
+                preferenceItems = persistentListOf(
+                    info("Every manga-facing Treasury visual is available immediately. No achievement, progression, or profile unlock is required. These choices affect manga cards and manga title/details surfaces only; Komikku Home and the reader remain unchanged."),
+                    list(preferences.mangaTreasuryTheme(), "Manga Treasury Theme", MangaTreasuryVisuals.effectLabels),
+                    list(preferences.mangaTreasuryAura(), "Manga Card Aura", MangaTreasuryVisuals.effectLabels),
+                    list(preferences.mangaTreasuryBackground(), "Manga Title Atmosphere", MangaTreasuryVisuals.effectLabels),
+                    list(preferences.mangaTreasuryFrame(), "Manga Card Frame", MangaTreasuryVisuals.effectLabels),
+                    slider(preferences.mangaTreasuryIntensity(), "Treasury Intensity", "0–100%", 0..100),
+                    switch(preferences.mangaTreasuryAnimations(), "Treasury Motion", "Allow lightweight animated shimmer/glitch accents; disable for reduced motion or lower GPU use."),
+                    Preference.PreferenceItem.TextPreference("Apply Treasury showcase preset", "Enable the Aurora Prime, Core Melt, Weeping Void, and Crimson frame showcase combination.", onClick = { preferences.applyPreset("treasury") }),
+                    Preference.PreferenceItem.TextPreference("Disable all manga Treasury visuals", "Return manga cards and title surfaces to the normal Komikku presentation.", onClick = {
+                        preferences.mangaTreasuryAura().set(MangaTreasuryVisuals.NONE)
+                        preferences.mangaTreasuryBackground().set(MangaTreasuryVisuals.NONE)
+                        preferences.mangaTreasuryFrame().set(MangaTreasuryVisuals.NONE)
+                        preferences.mangaTreasuryIntensity().set(0)
+                        preferences.mangaTreasuryAnimations().set(false)
+                    }),
                 ),
             ),
         )
