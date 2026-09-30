@@ -30,7 +30,6 @@ import eu.kanade.domain.ui.KomikkuCustomisationPreferences
 import eu.kanade.domain.ui.DoujinCustomisationsPreferences
 import eu.kanade.domain.ui.KomikkuFullFeatureEngine
 import eu.kanade.presentation.more.KodamiProfileCard
-import eu.kanade.presentation.more.KodamiTreasuryBackdrop
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
@@ -85,7 +84,6 @@ fun LibraryPager(
 
         if (items.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize()) {
-                if (page == state.currentPage) KodamiTreasuryBackdrop(Modifier.fillMaxSize())
                 LibraryPagerEmptyScreen(
                     searchQuery = searchQuery,
                     hasActiveFilters = hasActiveFilters,
@@ -227,7 +225,6 @@ fun LibraryPager(
             }
         }
         Box(modifier = Modifier.fillMaxSize()) {
-            if (page == state.currentPage) KodamiTreasuryBackdrop(Modifier.fillMaxSize())
             if (adaptiveLayout.twoPane) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.width(200.dp).padding(12.dp)) {

@@ -1,18 +1,11 @@
 package eu.kanade.presentation.more
 
-import android.animation.ValueAnimator
-import android.content.Context
-import android.os.PowerManager
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import android.os.SystemClock
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -34,12 +26,17 @@ import eu.kanade.domain.ui.KodamiTreasuryPreferences
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 /** Animated, low-cost Treasury backdrops inspired by Tadami's ambient canvas. */
+private const val BACKGROUND_CYCLE_MILLIS = 14_000L
+private const val BACKGROUND_FRAME_DELAY_MILLIS = 33L
+
 @Composable
 internal fun KodamiTreasuryBackdrop(
     modifier: Modifier = Modifier,
@@ -52,40 +49,33 @@ internal fun KodamiTreasuryBackdrop(
     if (effect == "none") return
 
     val lifecycleOwner = LocalLifecycleOwner.current
-    var isResumed by remember(lifecycleOwner) {
-        mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+    var isStarted by remember(lifecycleOwner) {
+        mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED))
     }
     DisposableEffect(lifecycleOwner.lifecycle) {
         val observer = LifecycleEventObserver { _, _ ->
-            isResumed = lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+            isStarted = lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    val context = LocalContext.current
-    val powerManager = remember(context) {
-        context.getSystemService(Context.POWER_SERVICE) as? PowerManager
+    val shouldAnimate = isStarted && (animateOverride ?: true)
+    var elapsedMillis by remember(effect) { mutableStateOf(0L) }
+    LaunchedEffect(effect, shouldAnimate) {
+        if (!shouldAnimate) {
+            elapsedMillis = 0L
+            return@LaunchedEffect
+        }
+        val animationStart = SystemClock.uptimeMillis()
+        while (isActive) {
+            elapsedMillis = SystemClock.uptimeMillis() - animationStart
+            delay(BACKGROUND_FRAME_DELAY_MILLIS)
+        }
     }
-    val shouldAnimate = isResumed &&
-        powerManager?.isPowerSaveMode != true &&
-        ValueAnimator.areAnimatorsEnabled() &&
-        (animateOverride ?: true)
     val phase = if (shouldAnimate) {
-        val transition = rememberInfiniteTransition(label = "treasury-$effect")
-        val animatedPhase by transition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 26_000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart,
-            ),
-            label = "treasury-background-phase",
-        )
-        animatedPhase
-    } else {
-        0f
-    }
+        (elapsedMillis % BACKGROUND_CYCLE_MILLIS).toFloat() / BACKGROUND_CYCLE_MILLIS
+    } else 0f
 
     Canvas(modifier = modifier.fillMaxSize()) {
         val w = size.width

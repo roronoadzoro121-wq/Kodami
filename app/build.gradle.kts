@@ -28,8 +28,8 @@ android {
     defaultConfig {
         applicationId = "com.zoro.kodami"
 
-        versionCode = 84
-        versionName = "1.14.4"
+        versionCode = 85
+        versionName = "1.14.5"
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getGitSha()}\"")
