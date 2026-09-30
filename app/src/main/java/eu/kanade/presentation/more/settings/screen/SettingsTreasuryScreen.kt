@@ -103,6 +103,9 @@ object SettingsTreasuryScreen : Screen() {
                                     onBadgeSelected = { treasury.homeBadge().set(it) },
                                 )
                             },
+                            Preference.PreferenceItem.CustomPreference(title = "Profile picture") {
+                                ProfilePhotoPreference(treasury)
+                            },
                             Preference.PreferenceItem.EditTextPreference(
                                 preference = treasury.profileName(),
                                 title = "Profile name",
@@ -116,6 +119,17 @@ object SettingsTreasuryScreen : Screen() {
                         ),
                     ),
                     Preference.PreferenceGroup(
+                        title = "Daily offline cache",
+                        preferenceItems = persistentListOf(
+                            Preference.PreferenceItem.CustomPreference(title = "Cache 30 random titles") {
+                                DailyOfflineCachePreference(treasury)
+                            },
+                            Preference.PreferenceItem.InfoPreference(
+                                "Chooses up to 30 random library titles and queues every available chapter. Existing downloads are kept. The daily cache expires at local midnight; a large cache can use substantial storage and mobile data.",
+                            ),
+                        ),
+                    ),
+                    Preference.PreferenceGroup(
                         title = "Manga and reading options",
                         preferenceItems = persistentListOf(
                             Preference.PreferenceItem.TextPreference(
@@ -124,7 +138,7 @@ object SettingsTreasuryScreen : Screen() {
                                 onClick = { navigator?.push(SettingsDoujinCustomisationsScreen) },
                             ),
                             Preference.PreferenceItem.TextPreference(
-                                title = "Kodami customization",
+                                title = "Komikku customization",
                                 subtitle = "Library layout, manga cards, reader profiles, and app-wide options",
                                 onClick = { navigator?.push(SettingsKomikkuCustomisationScreen) },
                             ),

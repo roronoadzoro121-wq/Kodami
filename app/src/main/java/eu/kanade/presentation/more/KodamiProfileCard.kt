@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -24,10 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
+import coil3.compose.AsyncImage
 import eu.kanade.domain.ui.KodamiTreasuryPreferences
 import eu.kanade.presentation.more.settings.screen.SettingsTreasuryScreen
 import tachiyomi.core.common.preference.PreferenceStore
@@ -44,23 +48,12 @@ internal fun KodamiProfileCard(modifier: Modifier = Modifier) {
     val title by preferences.profileTitle().collectAsState()
     val effect by preferences.nicknameEffect().collectAsState()
     val frame by preferences.avatarFrame().collectAsState()
+    val photoUri by preferences.profilePhotoUri().collectAsState()
     val badge by preferences.homeBadge().collectAsState()
-    val frameColors = when (frame) {
-        "none" -> listOf(Color.Transparent, Color.Transparent)
-        "glitch_red" -> listOf(Color(0xFFFF1744), Color(0xFF8E001C))
-        "neon" -> listOf(Color(0xFF5DE7D8), Color(0xFF00A6FF))
-        "hologram", "prismatic" -> listOf(Color(0xFFFF4E9E), Color(0xFF6CC6FF), Color(0xFFB388FF))
-        "trinity_orbit" -> listOf(Color(0xFF64E8FF), Color(0xFF9C7CFF), Color(0xFFFFD36E))
-        "deep_archive" -> listOf(Color(0xFF5DE7D8), Color(0xFF164A63))
-        "hybrid_scroll" -> listOf(Color(0xFFFFD36E), Color(0xFF9C7CFF))
-        "ascendant" -> listOf(Color(0xFFFFD36E), Color(0xFFFF8FB1), Color(0xFF9C7CFF))
-        else -> listOf(MaterialTheme.colorScheme.outline.copy(alpha = 0.45f), MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
-    }
     val nameColor = when (effect) {
         "glitch_rune_red" -> Color(0xFFFF4259)
         "aurora_crown", "trinity_prism" -> Color(0xFF9C7CFF)
-        "glitch_rune" -> Color(0xFF5DE7D8)
-        "cipher" -> Color(0xFF5DE7D8)
+        "glitch_rune", "cipher" -> Color(0xFF5DE7D8)
         "shadow_crown" -> MaterialTheme.colorScheme.tertiary
         "rank_sigils" -> Color(0xFFFFD36E)
         else -> MaterialTheme.colorScheme.onSurface
@@ -75,22 +68,12 @@ internal fun KodamiProfileCard(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Box(
-                modifier = Modifier
-                    .size(58.dp)
-                    .border(3.dp, Brush.sweepGradient(frameColors), CircleShape)
-                    .padding(4.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = name.trim().firstOrNull()?.uppercase() ?: "K",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+            KodamiProfileAvatar(
+                name = name,
+                photoUri = photoUri,
+                frame = frame,
+                size = 58.dp,
+            )
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 if (tagline.isNotBlank()) {
@@ -103,7 +86,7 @@ internal fun KodamiProfileCard(modifier: Modifier = Modifier) {
                     )
                 }
                 Text(
-                    text = name.ifBlank { "Kodami Reader" },
+                    text = name.ifBlank { "Komikku Reader" },
                     color = nameColor,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
@@ -128,6 +111,55 @@ internal fun KodamiProfileCard(modifier: Modifier = Modifier) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+internal fun KodamiProfileAvatar(
+    name: String,
+    photoUri: String,
+    frame: String,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp,
+) {
+    val frameColors = when (frame) {
+        "none" -> listOf(Color.Transparent, Color.Transparent)
+        "glitch_red" -> listOf(Color(0xFFFF1744), Color(0xFF8E001C))
+        "neon" -> listOf(Color(0xFF5DE7D8), Color(0xFF00A6FF))
+        "hologram", "prismatic" -> listOf(Color(0xFFFF4E9E), Color(0xFF6CC6FF), Color(0xFFB388FF))
+        "trinity_orbit" -> listOf(Color(0xFF64E8FF), Color(0xFF9C7CFF), Color(0xFFFFD36E))
+        "deep_archive" -> listOf(Color(0xFF5DE7D8), Color(0xFF164A63))
+        "hybrid_scroll" -> listOf(Color(0xFFFFD36E), Color(0xFF9C7CFF))
+        "ascendant" -> listOf(Color(0xFFFFD36E), Color(0xFFFF8FB1), Color(0xFF9C7CFF))
+        else -> listOf(
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.45f),
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.45f),
+        )
+    }
+    Box(
+        modifier = modifier
+            .size(size)
+            .border(3.dp, Brush.sweepGradient(frameColors), CircleShape)
+            .padding(4.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primaryContainer),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (photoUri.isNotBlank()) {
+            AsyncImage(
+                model = photoUri,
+                contentDescription = "Profile photo",
+                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                contentScale = ContentScale.Crop,
+            )
+        } else {
+            Text(
+                text = name.trim().firstOrNull()?.uppercase() ?: "K",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontWeight = FontWeight.Bold,
+            )
         }
     }
 }

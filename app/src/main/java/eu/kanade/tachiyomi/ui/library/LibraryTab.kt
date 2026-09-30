@@ -42,6 +42,7 @@ import eu.kanade.presentation.library.components.SyncFavoritesProgressDialog
 import eu.kanade.presentation.library.components.SyncFavoritesWarningDialog
 import eu.kanade.presentation.manga.components.LibraryBottomActionMenu
 import eu.kanade.presentation.more.KodamiTreasuryBackdrop
+import eu.kanade.presentation.more.settings.screen.SettingsTreasuryScreen
 import eu.kanade.presentation.more.onboarding.GETTING_STARTED_URL
 import eu.kanade.presentation.util.Tab
 import eu.kanade.tachiyomi.R
@@ -162,6 +163,7 @@ data object LibraryTab : Tab {
                     onClickSelectAll = screenModel::selectAll,
                     onClickInvertSelection = screenModel::invertSelection,
                     onClickFilter = screenModel::showSettingsDialog,
+                    onClickProfile = { navigator.push(SettingsTreasuryScreen) },
                     onClickRefresh = { onClickRefresh(state.activeCategory) },
                     onClickGlobalUpdate = { onClickRefresh(null) },
                     onClickOpenRandomManga = {

@@ -29,7 +29,6 @@ import eu.kanade.core.preference.asState
 import eu.kanade.domain.ui.KomikkuCustomisationPreferences
 import eu.kanade.domain.ui.DoujinCustomisationsPreferences
 import eu.kanade.domain.ui.KomikkuFullFeatureEngine
-import eu.kanade.presentation.more.KodamiProfileCard
 import eu.kanade.tachiyomi.ui.library.LibraryItem
 import tachiyomi.domain.category.model.Category
 import tachiyomi.domain.library.model.LibraryDisplayMode
@@ -228,18 +227,15 @@ fun LibraryPager(
             if (adaptiveLayout.twoPane) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.width(200.dp).padding(12.dp)) {
-                        Text("Library", style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
                         Text(category.name, style = androidx.compose.material3.MaterialTheme.typography.bodyMedium)
                         Text("${items.size} visible items", style = androidx.compose.material3.MaterialTheme.typography.bodySmall)
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        KodamiProfileCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                         libraryBody()
                     }
                 }
             } else {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    KodamiProfileCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
                     libraryBody()
                 }
             }
@@ -266,7 +262,6 @@ private fun LibraryPagerEmptyScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        KodamiProfileCard(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
         if (!searchQuery.isNullOrEmpty()) {
             GlobalSearchItem(
                 modifier = Modifier

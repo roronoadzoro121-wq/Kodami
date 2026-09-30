@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">Kodami</string>
+    <string name="app_name" translatable="false">Komikku</string>
 
     <!-- Generic strings -->
     <string name="on">On</string>
@@ -44,6 +44,7 @@
     <string name="label_started">Started</string>
     <string name="label_local">Local</string>
     <string name="label_downloaded">Downloaded</string>
+    <string name="label_cached">Cached</string>
 
     <string name="unlock_app_title">Unlock %s</string>
     <string name="confirm_lock_change">Authenticate to confirm change</string>
