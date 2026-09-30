@@ -77,6 +77,13 @@ jobs:
           cp ../app/src/main/java/eu/kanade/presentation/more/settings/screen/SettingsDoujinCustomisationsScreen.kt app/src/main/java/eu/kanade/presentation/more/settings/screen/SettingsDoujinCustomisationsScreen.kt
           cp ../app/src/main/java/eu/kanade/presentation/more/settings/screen/SettingsMainScreen.kt app/src/main/java/eu/kanade/presentation/more/settings/screen/SettingsMainScreen.kt
           cp ../app/src/main/java/eu/kanade/presentation/more/settings/screen/SettingsSearchScreen.kt app/src/main/java/eu/kanade/presentation/more/settings/screen/SettingsSearchScreen.kt
+          cp ../app/src/main/java/eu/kanade/presentation/more/settings/screen/SettingsTreasuryScreen.kt app/src/main/java/eu/kanade/presentation/more/settings/screen/SettingsTreasuryScreen.kt
+          cp ../app/src/main/java/eu/kanade/presentation/more/settings/widget/AppThemePreferenceWidget.kt app/src/main/java/eu/kanade/presentation/more/settings/widget/AppThemePreferenceWidget.kt
+          cp ../app/src/main/java/eu/kanade/domain/ui/KodamiTreasuryPreferences.kt app/src/main/java/eu/kanade/domain/ui/KodamiTreasuryPreferences.kt
+          cp ../app/src/main/java/eu/kanade/domain/ui/model/AppTheme.kt app/src/main/java/eu/kanade/domain/ui/model/AppTheme.kt
+          cp ../app/src/main/java/eu/kanade/presentation/more/KodamiProfileCard.kt app/src/main/java/eu/kanade/presentation/more/KodamiProfileCard.kt
+          cp ../app/src/main/java/eu/kanade/presentation/more/KodamiTreasuryBackdrop.kt app/src/main/java/eu/kanade/presentation/more/KodamiTreasuryBackdrop.kt
+          cp ../app/src/main/java/eu/kanade/presentation/library/components/DoujinCardAppearance.kt app/src/main/java/eu/kanade/presentation/library/components/DoujinCardAppearance.kt
           cp ../app/src/main/java/eu/kanade/presentation/library/components/LibraryToolbar.kt app/src/main/java/eu/kanade/presentation/library/components/LibraryToolbar.kt
           cp ../app/src/main/java/eu/kanade/presentation/more/MoreScreen.kt app/src/main/java/eu/kanade/presentation/more/MoreScreen.kt
           cp ../app/src/main/java/eu/kanade/presentation/more/KomikkuFeatureHubScreen.kt app/src/main/java/eu/kanade/presentation/more/KomikkuFeatureHubScreen.kt
@@ -120,8 +127,12 @@ jobs:
           cp ../full-feature-overlay/app/src/main/java/eu/kanade/presentation/more/KomikkuFeatureHubScreen.kt app/src/main/java/eu/kanade/presentation/more/KomikkuFeatureHubScreen.kt
           cp ../full-feature-overlay/app/src/main/java/eu/kanade/tachiyomi/App.kt app/src/main/java/eu/kanade/tachiyomi/App.kt
           mkdir -p app/src/main/java/eu/kanade/presentation/library/components app/src/main/java/eu/kanade/presentation/theme app/src/main/java/eu/kanade/tachiyomi/ui/library
-          cp ../full-feature-overlay/app/src/main/java/eu/kanade/presentation/library/components/LibraryPager.kt app/src/main/java/eu/kanade/presentation/library/components/LibraryPager.kt
-          cp ../full-feature-overlay/app/src/main/java/eu/kanade/presentation/theme/TachiyomiTheme.kt app/src/main/java/eu/kanade/presentation/theme/TachiyomiTheme.kt
+          cp ../app/src/main/java/eu/kanade/presentation/library/components/LibraryPager.kt app/src/main/java/eu/kanade/presentation/library/components/LibraryPager.kt
+          cp ../app/src/main/java/eu/kanade/presentation/theme/TachiyomiTheme.kt app/src/main/java/eu/kanade/presentation/theme/TachiyomiTheme.kt
+          mkdir -p app/src/main/java/eu/kanade/presentation/theme/colorscheme
+          for palette in OnyxGold SakuraNoir NebulaTide EventHorizon VoidRed AuroraPrime LatticeProtocol; do
+            cp "../app/src/main/java/eu/kanade/presentation/theme/colorscheme/${palette}ColorScheme.kt" "app/src/main/java/eu/kanade/presentation/theme/colorscheme/${palette}ColorScheme.kt"
+          done
           cp ../full-feature-overlay/app/src/main/java/eu/kanade/tachiyomi/ui/library/LibraryScreenModel.kt app/src/main/java/eu/kanade/tachiyomi/ui/library/LibraryScreenModel.kt
           grep -q '^package exh.ui.nhentaidate$' app/src/main/java/exh/ui/nhentaidate/NhentaiDateImportScreen.kt
           grep -q 'prefer the visible all-language Nhentai delegate first' app/src/main/java/exh/GalleryAdder.kt
