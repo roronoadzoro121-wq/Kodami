@@ -1,7 +1,10 @@
 package eu.kanade.presentation.more.settings.screen
 
 import android.app.Activity
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -12,14 +15,12 @@ import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.PreferenceScaffold
 import eu.kanade.presentation.util.Screen
-import eu.kanade.presentation.more.settings.screen.SettingsKomikkuCustomisationScreen
-import eu.kanade.presentation.more.settings.screen.SettingsDoujinCustomisationsScreen
-import eu.kanade.presentation.more.settings.screen.SettingsReaderScreen
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.persistentMapOf
 import tachiyomi.core.common.preference.Preference as PreferenceData
 import tachiyomi.core.common.preference.PreferenceStore
 import tachiyomi.i18n.kmk.KMR
+import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -28,29 +29,18 @@ object SettingsTreasuryScreen : Screen() {
     override fun Content() {
         val navigator = LocalNavigator.current
         val context = LocalContext.current
-        val uiPreferences = androidx.compose.runtime.remember { Injekt.get<UiPreferences>() }
-        val treasury = androidx.compose.runtime.remember {
-            KodamiTreasuryPreferences(Injekt.get<PreferenceStore>())
-        }
-        val customisation = androidx.compose.runtime.remember {
-            KomikkuCustomisationPreferences(Injekt.get<PreferenceStore>())
-        }
-        val themeOptions = androidx.compose.runtime.remember {
-            AppTheme.entries.filter { it.titleRes != null }.associateWith { theme ->
-                when (theme) {
-                    AppTheme.ONYX_GOLD -> "Onyx Gold"
-                    AppTheme.SAKURA_NOIR -> "Sakura Noir"
-                    AppTheme.NEBULA_TIDE -> "Nebula Tide"
-                    AppTheme.EVENT_HORIZON -> "Event Horizon"
-                    AppTheme.VOID_RED -> "Blood of Lilith"
-                    AppTheme.AURORA_PRIME -> "Aurora Prime"
-                    AppTheme.LATTICE_PROTOCOL -> "Lattice Protocol"
-                    else -> theme.name.lowercase().split('_').joinToString(" ") { part ->
-                        part.replaceFirstChar { it.uppercase() }
-                    }
-                }
-            }
-        }
+        val uiPreferences = remember { Injekt.get<UiPreferences>() }
+        val treasury = remember { KodamiTreasuryPreferences(Injekt.get<PreferenceStore>()) }
+        val customisation = remember { KomikkuCustomisationPreferences(Injekt.get<PreferenceStore>()) }
+
+        val selectedTheme by uiPreferences.appTheme().collectAsState()
+        val themeName = selectedTheme.titleRes?.let { stringResource(it) } ?: selectedTheme.name
+        val amoled by uiPreferences.themeDarkAmoled().collectAsState()
+        val selectedEffect by treasury.backgroundEffect().collectAsState()
+        val profileTitle by treasury.profileTitle().collectAsState()
+        val nicknameEffect by treasury.nicknameEffect().collectAsState()
+        val avatarFrame by treasury.avatarFrame().collectAsState()
+        val homeBadge by treasury.homeBadge().collectAsState()
 
         PreferenceScaffold(
             titleRes = KMR.strings.pref_category_treasury,
@@ -58,49 +48,61 @@ object SettingsTreasuryScreen : Screen() {
             itemsProvider = {
                 listOf(
                     Preference.PreferenceGroup(
+                        title = "Treasury vault",
+                        preferenceItems = persistentListOf(
+                            Preference.PreferenceItem.CustomPreference(title = "All cosmetics available") {
+                                KodamiTreasuryVaultHeader(
+                                    themeName = themeName,
+                                    selectedEffect = selectedEffect,
+                                    accent = MaterialTheme.colorScheme.primary,
+                                )
+                            },
+                        ),
+                    ),
+                    Preference.PreferenceGroup(
                         title = "Treasury themes",
                         preferenceItems = persistentListOf(
-                            Preference.PreferenceItem.InfoPreference(
-                                "Every Treasury item is available immediately in Kodami—no achievements, riddles, or unlocks are required.",
-                            ),
-                            Preference.PreferenceItem.ListPreference(
-                                preference = uiPreferences.appTheme(),
-                                entries = persistentMapOf(*themeOptions.toList().toTypedArray()),
-                                title = "App color theme",
-                                subtitle = "%s",
-                                onValueChanged = {
-                                    (context as? Activity)?.let { ActivityCompat.recreate(it) }
-                                    true
-                                },
-                            ),
+                            Preference.PreferenceItem.CustomPreference(title = "Exclusive colorways") {
+                                KodamiTreasuryThemeSelector(
+                                    selectedTheme = selectedTheme,
+                                    amoled = amoled,
+                                    onThemeSelected = { theme ->
+                                        uiPreferences.appTheme().set(theme)
+                                        (context as? Activity)?.let { ActivityCompat.recreate(it) }
+                                    },
+                                )
+                            },
                         ),
                     ),
                     Preference.PreferenceGroup(
                         title = "Background effects",
                         preferenceItems = persistentListOf(
-                            listPreference(
-                                preference = treasury.backgroundEffect(),
-                                title = "Background effect",
-                                values = linkedMapOf(
-                                    "none" to "Off",
-                                    "petal_storm" to "Petal Storm",
-                                    "neon_orbit" to "Neon Orbit",
-                                    "trinity_constellation" to "Trinity Constellation",
-                                    "deep_space_archive" to "Deep Space Archive",
-                                    "shadow_realm" to "Shadow Realm",
-                                    "event_horizon_library" to "Event Horizon Library",
-                                    "void_weeping_red" to "Weeping Void",
-                                    "ink_water" to "Ink in Water",
-                                ),
-                            ),
+                            Preference.PreferenceItem.CustomPreference(title = "Select an animated backdrop") {
+                                KodamiTreasuryBackgroundSelector(
+                                    selectedEffect = selectedEffect,
+                                    onEffectSelected = { treasury.backgroundEffect().set(it) },
+                                )
+                            },
                             Preference.PreferenceItem.InfoPreference(
-                                "Background effects appear behind the More and Library screens. They stay static to keep scrolling smooth.",
+                                "The active effect animates behind Library and More. Motion pauses in the background, with system animations disabled, or while Battery Saver is active.",
                             ),
                         ),
                     ),
                     Preference.PreferenceGroup(
                         title = "Profile options",
                         preferenceItems = persistentListOf(
+                            Preference.PreferenceItem.CustomPreference(title = "Titles, effects, frames, and badges") {
+                                KodamiTreasuryProfileSelector(
+                                    selectedTitle = profileTitle,
+                                    selectedNameEffect = nicknameEffect,
+                                    selectedFrame = avatarFrame,
+                                    selectedBadge = homeBadge,
+                                    onTitleSelected = { treasury.profileTitle().set(it) },
+                                    onNameEffectSelected = { treasury.nicknameEffect().set(it) },
+                                    onFrameSelected = { treasury.avatarFrame().set(it) },
+                                    onBadgeSelected = { treasury.homeBadge().set(it) },
+                                )
+                            },
                             Preference.PreferenceItem.EditTextPreference(
                                 preference = treasury.profileName(),
                                 title = "Profile name",
@@ -110,61 +112,6 @@ object SettingsTreasuryScreen : Screen() {
                                 preference = treasury.profileTagline(),
                                 title = "Profile status line",
                                 subtitle = "%s",
-                            ),
-                            listPreference(
-                                preference = treasury.profileTitle(),
-                                title = "Profile title",
-                                values = linkedMapOf(
-                                    "none" to "No title",
-                                    "title_trinity_initiate" to "Trinity Initiate",
-                                    "title_finisher" to "Finisher",
-                                    "title_closer" to "Closer",
-                                    "title_deep_reader" to "Deep Reader",
-                                    "title_rank_4" to "Rank 4",
-                                ),
-                            ),
-                            listPreference(
-                                preference = treasury.nicknameEffect(),
-                                title = "Name effect",
-                                values = linkedMapOf(
-                                    "none" to "Off",
-                                    "aurora_crown" to "Aurora Crown",
-                                    "glitch_rune" to "Glitch Rune",
-                                    "glitch_rune_red" to "Crimson Glitch",
-                                    "cipher" to "Cipher",
-                                    "trinity_prism" to "Trinity Prism",
-                                    "shadow_crown" to "Shadow Crown",
-                                    "rank_sigils" to "Rank Sigils",
-                                ),
-                            ),
-                            listPreference(
-                                preference = treasury.avatarFrame(),
-                                title = "Avatar frame",
-                                values = linkedMapOf(
-                                    "none" to "Off",
-                                    "glitch_red" to "Glitch Red",
-                                    "neon" to "Neon",
-                                    "hologram" to "Hologram",
-                                    "prismatic" to "Prismatic",
-                                    "trinity_orbit" to "Trinity Orbit",
-                                    "deep_archive" to "Deep Archive",
-                                    "hybrid_scroll" to "Hybrid Scroll",
-                                    "ascendant" to "Ascendant",
-                                ),
-                            ),
-                            listPreference(
-                                preference = treasury.homeBadge(),
-                                title = "Profile badge",
-                                values = linkedMapOf(
-                                    "none" to "Off",
-                                    "orbit" to "Orbit",
-                                    "crown" to "Crown",
-                                    "shuriken" to "Shuriken",
-                                    "trinity" to "Trinity",
-                                    "finisher" to "Finisher",
-                                    "immersion" to "Immersion",
-                                    "ascendant" to "Ascendant",
-                                ),
                             ),
                         ),
                     ),
@@ -218,7 +165,7 @@ object SettingsTreasuryScreen : Screen() {
         values: Map<T, String>,
     ) = Preference.PreferenceItem.ListPreference(
         preference = preference,
-        entries = persistentMapOf(*values.toList().toTypedArray()),
+        entries = kotlinx.collections.immutable.persistentMapOf(*values.toList().toTypedArray()),
         title = title,
         subtitle = "%s",
     )
