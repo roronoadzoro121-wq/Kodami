@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.navigator.LocalNavigator
 import eu.kanade.domain.ui.DoujinCustomisationsPreferences
 import eu.kanade.presentation.components.MangaTreasuryVisuals
+import eu.kanade.presentation.components.MangaTreasuryVisuals.mangaTreasuryCard
+import eu.kanade.presentation.components.MangaTreasuryVisuals.mangaTreasuryTitleSurface
 import eu.kanade.presentation.more.settings.Preference
 import eu.kanade.presentation.more.settings.PreferenceScaffold
 import eu.kanade.presentation.util.Screen
@@ -153,6 +155,15 @@ object SettingsDoujinCustomisationsScreen : SearchableSettings {
     private fun cosmeticPreferences(preferences: DoujinCustomisationsPreferences): List<Preference> {
         val previewStyle by preferences.cardStyle().collectAsState()
         val previewRadius by preferences.coverCornerRadius().collectAsState()
+        val treasuryTheme by preferences.mangaTreasuryTheme().collectAsState()
+        val treasuryAura by preferences.mangaTreasuryAura().collectAsState()
+        val treasuryBackground by preferences.mangaTreasuryBackground().collectAsState()
+        val treasuryFrame by preferences.mangaTreasuryFrame().collectAsState()
+        val treasuryIntensity by preferences.mangaTreasuryIntensity().collectAsState()
+        val treasuryAnimations by preferences.mangaTreasuryAnimations().collectAsState()
+        val treasuryPreviewEffect = listOf(treasuryAura, treasuryFrame, treasuryBackground, treasuryTheme)
+            .firstOrNull { it != MangaTreasuryVisuals.NONE }
+            ?: MangaTreasuryVisuals.AURORA_PRIME
         return listOf(
             Preference.PreferenceGroup(
                 title = "Appearance and cards",
@@ -276,6 +287,30 @@ object SettingsDoujinCustomisationsScreen : SearchableSettings {
                 title = "Manga Treasury — all effects available",
                 preferenceItems = persistentListOf(
                     info("Every manga-facing Treasury visual is available immediately. No achievement, progression, or profile unlock is required. These choices affect manga cards and manga title/details surfaces only; Komikku Home and the reader remain unchanged."),
+                    Preference.PreferenceItem.CustomPreference(
+                        title = "Live Treasury preview",
+                        content = {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                                    .height(112.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(22.dp))
+                                    .mangaTreasuryTitleSurface(treasuryPreviewEffect, treasuryIntensity, treasuryAnimations)
+                                    .mangaTreasuryCard(treasuryPreviewEffect, treasuryIntensity, 22.dp, treasuryAnimations)
+                                    .padding(16.dp),
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text("Treasury preview", style = MaterialTheme.typography.titleMedium)
+                                    Text(
+                                        text = MangaTreasuryVisuals.effectLabels[treasuryPreviewEffect].orEmpty() +
+                                            if (treasuryAnimations) " • animated" else " • motion disabled",
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                            }
+                        },
+                    ),
                     list(preferences.mangaTreasuryTheme(), "Manga Treasury Theme", MangaTreasuryVisuals.effectLabels),
                     list(preferences.mangaTreasuryAura(), "Manga Card Aura", MangaTreasuryVisuals.effectLabels),
                     list(preferences.mangaTreasuryBackground(), "Manga Title Atmosphere", MangaTreasuryVisuals.effectLabels),

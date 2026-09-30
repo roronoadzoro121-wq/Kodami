@@ -1,8 +1,14 @@
 package eu.kanade.presentation.components
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -11,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlin.math.sin
 
 /**
  * Manga-facing Treasury visuals. These are deliberately independent of achievements and profile
@@ -73,23 +78,25 @@ object MangaTreasuryVisuals {
         else -> Triple(Color(0xFF0A0A12), Color(0xFF9B7CFF), Color(0xFF38D6C4))
     }
 
+    @Composable
     fun Modifier.mangaTreasuryCard(
         effect: String,
         intensity: Int,
         cornerRadius: Dp,
         animated: Boolean,
-    ): Modifier = then(
-        Modifier.drawBehind {
-            drawTreasuryFrame(effect, intensity, cornerRadius.toPx(), animated)
-        },
-    )
+    ): Modifier {
+        val phase by treasuryPhase(animated)
+        return drawBehind { drawTreasuryFrame(effect, intensity, cornerRadius.toPx(), phase) }
+    }
 
+    @Composable
     fun Modifier.mangaTreasuryTitleSurface(
         effect: String,
         intensity: Int,
         animated: Boolean,
-    ): Modifier = then(
-        Modifier.drawBehind {
+    ): Modifier {
+        val phase by treasuryPhase(animated)
+        return drawBehind {
             val (base, accent, secondary) = palette(effect)
             val amount = intensity.coerceIn(0, 100) / 100f
             drawRect(
@@ -97,15 +104,27 @@ object MangaTreasuryVisuals {
                     listOf(base.copy(alpha = 0.16f * amount), Color.Transparent),
                 ),
             )
-            if (effect != NONE) drawTreasuryFrame(effect, intensity, 24.dp.toPx(), animated, accent, secondary)
-        },
-    )
+            if (effect != NONE) drawTreasuryFrame(effect, intensity, 24.dp.toPx(), phase, accent, secondary)
+        }
+    }
+
+    @Composable
+    private fun treasuryPhase(animated: Boolean): androidx.compose.runtime.State<Float> {
+        if (!animated) return androidx.compose.runtime.mutableStateOf(0f)
+        val transition = rememberInfiniteTransition(label = "treasuryMotion")
+        return transition.animateFloat(
+            initialValue = -1f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(tween(1700, easing = LinearEasing), RepeatMode.Reverse),
+            label = "treasuryPhase",
+        )
+    }
 
     private fun DrawScope.drawTreasuryFrame(
         effect: String,
         intensity: Int,
         radius: Float,
-        animated: Boolean,
+        phase: Float,
         overrideAccent: Color? = null,
         overrideSecondary: Color? = null,
     ) {
@@ -114,11 +133,48 @@ object MangaTreasuryVisuals {
         val accent = overrideAccent ?: paletteAccent
         val secondary = overrideSecondary ?: paletteSecondary
         val amount = intensity.coerceIn(0, 100) / 100f
-        val phase = if (animated) sin(System.nanoTime() / 650_000_000.0).toFloat() * 0.08f else 0f
+        val atmosphere = if (phase == 0f) 0f else 1f
+        drawRoundRect(
+            brush = Brush.linearGradient(
+                colors = listOf(
+                    base.copy(alpha = 0.34f * amount),
+                    accent.copy(alpha = 0.11f * amount),
+                    secondary.copy(alpha = 0.18f * amount),
+                    base.copy(alpha = 0.30f * amount),
+                ),
+                start = Offset(size.width * (phase * 0.55f + 0.15f), 0f),
+                end = Offset(size.width * (phase * 0.55f + 0.85f), size.height),
+            ),
+            cornerRadius = androidx.compose.ui.geometry.CornerRadius(radius, radius),
+        )
+        if (atmosphere > 0f) {
+            drawCircle(
+                color = accent.copy(alpha = 0.12f * amount),
+                radius = size.minDimension * 0.52f,
+                center = Offset(size.width * (0.5f + phase * 0.42f), size.height * 0.38f),
+            )
+            drawCircle(
+                color = secondary.copy(alpha = 0.08f * amount),
+                radius = size.minDimension * 0.34f,
+                center = Offset(size.width * (0.45f - phase * 0.28f), size.height * 0.74f),
+            )
+        }
+        if (effect == CRIMSON_GLITCH || effect == CRIMSON_AVATAR_FRAME || effect == LATTICE_PROTOCOL) {
+            repeat(6) { index ->
+                val y = ((index + 1) / 7f) * size.height
+                val drift = phase * (8f + index * 3f)
+                drawLine(
+                    color = accent.copy(alpha = 0.08f * amount),
+                    start = Offset(drift, y),
+                    end = Offset(size.width + drift, y),
+                    strokeWidth = 1.dp.toPx(),
+                )
+            }
+        }
         drawRoundRect(
             brush = Brush.linearGradient(
                 colors = listOf(accent.copy(alpha = 0.62f * amount), secondary.copy(alpha = 0.5f * amount), accent.copy(alpha = 0.62f * amount)),
-                start = Offset(0f, phase * size.height),
+                start = Offset(0f, phase * size.height * 0.35f),
                 end = Offset(size.width, size.height),
             ),
             style = androidx.compose.ui.graphics.drawscope.Stroke(width = (1.2f + amount * 2.2f).dp.toPx()),
@@ -134,7 +190,7 @@ object MangaTreasuryVisuals {
             }
         }
         if (effect == TRINITY_ORBIT_FRAME || effect == TRINITY_CONSTELLATION) {
-            drawCircle(secondary.copy(alpha = 0.35f * amount), radius = size.minDimension * 0.44f, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx()))
+            drawCircle(secondary.copy(alpha = 0.35f * amount), radius = size.minDimension * (0.42f + phase * 0.04f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx()))
         }
         if (effect == NONE) drawRect(base.copy(alpha = 0f))
     }
