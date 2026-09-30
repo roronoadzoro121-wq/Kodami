@@ -66,6 +66,8 @@ jobs:
           cp ../domain/src/main/java/tachiyomi/domain/manga/repository/MangaRepository.kt domain/src/main/java/tachiyomi/domain/manga/repository/MangaRepository.kt
           cp ../data/src/main/java/tachiyomi/data/manga/MangaRepositoryImpl.kt data/src/main/java/tachiyomi/data/manga/MangaRepositoryImpl.kt
           cp ../data/src/main/sqldelight/tachiyomi/data/mangas.sq data/src/main/sqldelight/tachiyomi/data/mangas.sq
+          mkdir -p data/src/main/sqldelight/tachiyomi/view
+          cp ../data/src/main/sqldelight/tachiyomi/view/libraryView.sq data/src/main/sqldelight/tachiyomi/view/libraryView.sq
           cp ../app/src/main/java/eu/kanade/domain/ui/KomikkuCustomisationPreferences.kt app/src/main/java/eu/kanade/domain/ui/KomikkuCustomisationPreferences.kt
           cp ../app/src/main/java/eu/kanade/domain/ui/KomikkuFeatureStore.kt app/src/main/java/eu/kanade/domain/ui/KomikkuFeatureStore.kt
           cp ../app/src/main/java/eu/kanade/domain/ui/KomikkuExtendedFeatureStore.kt app/src/main/java/eu/kanade/domain/ui/KomikkuExtendedFeatureStore.kt
@@ -191,6 +193,11 @@ jobs:
           test -s app/src/main/java/exh/ui/batchadd/BatchImportJob.kt
           grep -q 'recordSourceEvent' app/src/main/java/exh/ui/batchadd/BatchImportJob.kt
           grep -q 'batch_import_retry' app/src/main/java/exh/ui/batchadd/BatchImportJob.kt
+          # The final archive is the authoritative, API-compatible overlay. Apply it last
+          # so older piecemeal copies cannot replace newer source snapshots.
+          unzip -oq ../komikku-final-overlay.zip -d .
+          sed -i 's#com.github.arkon.FlexibleAdapter:flexible-adapter:c8013533#eu.davidea:flexible-adapter:5.1.0#g' gradle/libs.versions.toml
+          grep -q 'eu.davidea:flexible-adapter:5.1.0' gradle/libs.versions.toml
           sed -i 's/applicationId = "app.komikku"/applicationId = "com.manus.komikku"/' app/build.gradle.kts
           # Force the generated APK to the stable-signed baseline identity.
           sed -i -E 's/^[[:space:]]*versionCode[[:space:]]*=.*/        versionCode = 86/' app/build.gradle.kts
