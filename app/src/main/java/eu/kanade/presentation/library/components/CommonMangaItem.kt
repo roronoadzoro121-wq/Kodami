@@ -50,6 +50,7 @@ import eu.kanade.presentation.manga.components.MangaCover
 import eu.kanade.presentation.manga.components.MangaCoverHide
 import eu.kanade.presentation.manga.components.RatioSwitchToPanorama
 import eu.kanade.presentation.components.MangaTreasuryVisuals.mangaTreasuryCard
+import eu.kanade.presentation.components.MangaAuroraDesignSystem.mangaAuroraCard
 import eu.kanade.domain.ui.DoujinCustomisationsPreferences
 import exh.debug.DebugToggles
 import tachiyomi.core.common.preference.PreferenceStore
@@ -148,6 +149,9 @@ fun MangaCompactGridItem(
             intensity = cardAppearance.treasuryIntensity,
             cornerRadius = cornerRadius.dp,
             animated = cardAppearance.treasuryAnimations,
+        ).mangaAuroraCard(
+            radius = cornerRadius.dp,
+            accent = MaterialTheme.colorScheme.primary,
         ),
     ) {
         MangaGridCover(
@@ -337,6 +341,9 @@ fun MangaComfortableGridItem(
             intensity = cardAppearance.treasuryIntensity,
             cornerRadius = cornerRadius.dp,
             animated = cardAppearance.treasuryAnimations,
+        ).mangaAuroraCard(
+            radius = cornerRadius.dp,
+            accent = MaterialTheme.colorScheme.primary,
         ),
     ) {
         Column {
@@ -591,6 +598,10 @@ fun MangaListItem(
                 intensity = cardAppearance.treasuryIntensity,
                 cornerRadius = cornerRadius.dp,
                 animated = cardAppearance.treasuryAnimations,
+            )
+            .mangaAuroraCard(
+                radius = cornerRadius.dp,
+                accent = MaterialTheme.colorScheme.primary,
             )
             .clip(cardShape)
             .shadow(if (cardShadow) 2.dp else 0.dp, cardShape)

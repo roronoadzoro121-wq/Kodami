@@ -95,6 +95,7 @@ import com.mikepenz.markdown.utils.getUnescapedTextInNode
 import eu.kanade.domain.ui.DoujinCustomisationsPreferences
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.presentation.components.MangaTreasuryVisuals.mangaTreasuryTitleSurface
+import eu.kanade.presentation.components.MangaAuroraDesignSystem.mangaAuroraCard
 import eu.kanade.presentation.components.DropdownMenu
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.SManga
@@ -171,6 +172,9 @@ fun MangaInfoBox(
             },
             intensity = treasuryIntensity,
             animated = treasuryAnimations,
+        ).mangaAuroraCard(
+            radius = 24.dp,
+            accent = MaterialTheme.colorScheme.primary,
         ),
     ) {
         // Backdrop

@@ -1,46 +1,62 @@
 # Kodami manga-only Tadami port inventory
 
-Baseline comparison: Tadami-Aniyomi-fork `6382175be690261a9cbeeae862bbbee33a04b44e` versus Kodami `b302c70b6fd744be07297300fb325055ce01c0ba`.
-
-## Scope
-
-Port only manga-facing UI/design/customisation into Kodami. Preserve Kodami/Komikku Home and the existing Komikku reader. Anime, light-novel, player, novel-reader, and Home-only implementations are excluded.
+This inventory is based on the actual effective Kodami build tree (Komikku base plus the compatible overlay) and the Tadami-Aniyomi-fork source tree.
 
 ## Component mapping
 
-| Tadami component family | Kodami/Komikku equivalent | Port decision |
-|---|---|---|
-| `presentation/entries/manga/MangaScreenAurora.kt` | `presentation/manga/MangaScreen.kt` and `MangaInfoHeader.kt` | Adapt manga presentation only; keep Komikku state, actions, chapter handling, tracking, notes, migration, downloads, and source behavior. |
-| `presentation/entries/manga/components/aurora/*` | `presentation/manga/components/*` | Adapt hero, metadata, chapter rows, progress, tags, actions, and responsive surfaces without importing AniYomi entry models. |
-| `presentation/components/AuroraCard.kt`, `AuroraComponents.kt`, `GlassmorphismCard.kt` | Existing Compose Material3 card/surface helpers | Recreate the reusable manga-safe visual primitives; do not replace Home surfaces. |
-| `presentation/library/manga/MangaLibraryAuroraContent.kt` | `presentation/library/components/*`, `LibraryPager.kt`, `LibraryContent.kt` | Adapt card surfaces, spacing, progress/unread badges, selection, categories, sorting, filtering, grouping, and large-library lazy rendering. |
-| `presentation/browse/manga/*` | `presentation/browse/*` and source/search screens | Adapt source cards, search results, filters, tabs, empty/loading/error states while preserving extension/source behavior. |
-| `presentation/more/settings/screen/SettingsTreasuryScreen.kt` | Kodami visual-customisation settings | Recreate manga-facing controls; all selected Treasury visual effects are available immediately with no achievement gate. |
-| `presentation/theme/AuroraTheme.kt`, `AuroraSurfaceTokens.kt` | Kodami `TachiyomiTheme.kt` and shared Compose components | Integrate reusable Aurora/Glass tokens through existing Material3 theme architecture. |
-| Tadami reader additions | Komikku reader | Compare functionally; retain Komikku implementation unless a genuinely missing, low-risk feature is independently added. No reader visual transplant. |
+| Area | Tadami source family | Kodami result | Decision |
+|---|---|---|---|
+| Manga hero/title | `entries/manga/components/aurora/MangaHeroContent.kt`, `MangaGlassHeroCard.kt`, `MangaInfoCard.kt` | `MangaInfoHeader.kt` with hero cover, blur, gradient, dynamic background and responsive tablet branch | Adapted |
+| Cover actions | `MangaCoverDialog.kt` and poster actions | `MangaCoverDialog.kt`, `MangaDialogs.kt`, existing cover callbacks | Keep Komikku behavior |
+| Metadata/status/genres | `MangaDetailsSnapshot.kt`, status formatter | `MangaInfoHeader.kt`, metadata rows, status and source actions | Keep Komikku behavior; Aurora surface added |
+| Description/Markdown/show-more | Tadami info-card description | `MarkdownRender.kt` and `ExpandableMangaDescription` with animated expansion | Keep Komikku behavior |
+| Chapter list/progress | `MangaChapterCardCompact.kt`, download indicator | `MangaChapterListItem.kt`, download indicator, chapter settings and selection | Keep Komikku behavior |
+| Manga actions | `MangaActionCard.kt` | `MangaInfoButtons.kt`, `MangaBottomActionMenu.kt`, toolbar and dialogs | Keep Komikku behavior |
+| Notes/edit/tracking | Aurora note/action cards | `MangaNotes*`, tracking dialogs, edit-info flows | Keep Komikku behavior |
+| Related/recommendations | Tadami related/history components | `RelatedMangasRow.kt` and browse recommendation flows | Keep Komikku behavior |
+| Library cards | Tadami Aurora library cards and badges | `CommonMangaItem.kt`, grid/list/masonry variants, Treasury aura/frame and reusable Aurora/Glass card treatment | Adapted |
+| Library organization | Tadami library pager/settings | `LibraryPager`, `LibraryToolbar`, `LibrarySettingsDialog`, categories, filters, sorting, grouping, bulk actions | Keep Komikku behavior |
+| Library performance | Tadami adaptive/lazy grids | Komikku lazy grids, masonry, fast scroll and large-library safeguards | Keep Komikku behavior |
+| Browse/source list | Tadami manga source components | `BrowseSourceScreen`, source list/grid/toolbar/filter/dialog components | Keep Komikku behavior |
+| Global search | Tadami global manga search components | `GlobalSearchScreen`, result cards and toolbar | Keep Komikku behavior |
+| Feed/related/migration | Tadami manga browse flows | Komikku feed, related, migration and extension flows | Keep Komikku behavior |
+| Settings/sheets/dialogs | Tadami manga settings and action sheets | Existing Komikku manga settings, notes, tracking, cover, filter, source and confirmation dialogs | Keep Komikku behavior |
+| Aurora/Glass foundation | Tadami Aurora theme, glass cards and adaptive helpers | `MangaAuroraDesignSystem.kt` plus existing Material3 theme; manga surfaces only | Adapted |
+| Treasury themes | Tadami Treasury registrations | `MangaTreasuryVisuals.kt` and preference selectors | All manga effects immediately available |
+| Reader | Tadami reader differences | Komikku reader remains primary: engine, rendering, gestures, zoom, caching, navigation and settings retained | Keep Komikku; no visual transplant |
 
 ## Treasury coverage
 
-The manga-facing customisation selector includes every named/general visual effect found in Tadami's Treasury implementation, including Blood of Lilith, Weeping Void, Core Melt, Crimson Glitch, Void Red, Aurora Prime, Onyx Gold, Sakura Noir, Nebula Tide, Event Horizon, Lattice Protocol, Ink Water, Petal Storm, Neon Orbit, Trinity Constellation, Deep Space Archive, Shadow Realm, and all frame variants. Effects are exposed as presentation choices for manga cards/title surfaces; they are not tied to achievements, unlock progress, or profile state.
+The manga Treasury selector is always unlocked. No achievement, profile progression, reward state or unlock predicate is consulted.
 
-Profile-only nickname/home-badge behavior is not transplanted into Komikku Home. Where a frame effect is selected, it is rendered as a manga-card/title treatment instead of changing unrelated profile or Home UI.
+Included identifiers cover:
+
+- Themes: Aurora Prime, Onyx Gold, Sakura Noir, Nebula Tide, Event Horizon Library, Void Red and Lattice Protocol.
+- Named effects: Blood of Lilith, Weeping Void, Core Melt and Crimson Glitch.
+- Frames: Crimson/Glitch Red, Neon, Hologram, Prismatic, Trinity Orbit, Deep Archive, Hybrid Scroll and Ascendant.
+- Background/atmosphere effects: Petal Storm, Neon Orbit, Trinity Constellation, Deep Space Archive, Shadow Realm and Ink Water.
+
+Profile-only nickname/home-badge behavior, Home-only rewards, anime/player effects, novel effects and unrelated achievement UI are not exposed as manga customisations.
+
+## Reader comparison decision
+
+| Difference class | Result |
+|---|---|
+| Komikku already provides reader engine/rendering/zoom/gestures/navigation/caching/settings | Keep Komikku |
+| Tadami visual-only reader styling | Do not port |
+| Tadami feature not present and demonstrably useful | No reader replacement was required for the current Komikku baseline |
 
 ## Explicit exclusions
 
-- Tadami Home hero, banner, cards, navigation, animations, and Home-only effects.
-- Anime screens, anime-player behavior, novel screens, novel-reader behavior, and their data models.
-- Replacing Komikku's reader engine or reader visual design.
-- Rewriting the database, download engine, source/extension architecture, or manga functionality.
-- Achievement-gated access: disabled for this port; all manga Treasury effects are available immediately.
+- Tadami Home layout, hero, banner, recent cards, navigation, animations and Home-only effects.
+- Anime, anime-player, light-novel and novel-reader features.
+- Achievement/progression requirements for manga visual effects.
+- Rewriting the Komikku database, downloading engine, source/extension architecture or reader engine.
 
-## Verification checklist
+## Verification record
 
-- [ ] Home remains on Komikku implementation.
-- [ ] Existing manga actions and chapter state remain intact.
-- [ ] Library remains lazy and responsive for large collections.
-- [ ] Manga title/details screen retains Komikku callbacks and data.
-- [ ] Browse/search/source functionality remains intact.
-- [ ] Treasury options are user-selectable and not achievement-locked.
-- [ ] Phone/tablet and portrait/landscape layouts compile and are reviewed.
-- [ ] Light/dark themes compile and are reviewed.
-- [ ] APK ZIP integrity, manifest, package/version, and signing are checked.
+- Kotlin compilation: successful after correction of Aurora Compose context errors.
+- Debug APK assembly: successful.
+- Final package: `com.manus.komikku`.
+- Final version: `1.14.8` / version code `92`.
+- APK verification: v2 signature verification and ZIP integrity to be performed on the final artifact before delivery.
