@@ -60,6 +60,18 @@ object MangaTreasuryVisuals {
         TRINITY_CONSTELLATION, DEEP_SPACE_ARCHIVE, SHADOW_REALM, INK_WATER,
     )
 
+    /** Tadami's manga-facing special backgrounds; Home/navbar customisations are excluded. */
+    val mangaBackgroundEffects: List<String> = listOf(
+        PETAL_STORM,
+        NEON_ORBIT,
+        TRINITY_CONSTELLATION,
+        DEEP_SPACE_ARCHIVE,
+        SHADOW_REALM,
+        EVENT_HORIZON,
+        WEEPING_VOID,
+        INK_WATER,
+    )
+
     val effectLabels: Map<String, String> = allEffects.associateWith { key ->
         key.replace('_', ' ').replaceFirstChar { it.uppercase() }
     }

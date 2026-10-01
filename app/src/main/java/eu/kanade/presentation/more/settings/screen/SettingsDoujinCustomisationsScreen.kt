@@ -286,7 +286,7 @@ object SettingsDoujinCustomisationsScreen : SearchableSettings {
             Preference.PreferenceGroup(
                 title = "Manga Treasury — all effects available",
                 preferenceItems = persistentListOf(
-                    info("Every manga-facing Treasury visual is available immediately. No achievement, progression, or profile unlock is required. These choices affect manga cards and manga title/details surfaces only; Komikku Home and the reader remain unchanged."),
+                    info("Every manga-facing Treasury visual is available immediately. No achievement, progression, or profile unlock is required. Coverage includes ${MangaTreasuryVisuals.mangaBackgroundEffects.size} Tadami background atmospheres and ${MangaTreasuryVisuals.allEffects.size - 1} total selectable effects. These choices affect manga cards and manga title/details surfaces only; Komikku Home and the reader remain unchanged."),
                     Preference.PreferenceItem.CustomPreference(
                         title = "Live Treasury preview",
                         content = {
@@ -319,6 +319,7 @@ object SettingsDoujinCustomisationsScreen : SearchableSettings {
                     switch(preferences.mangaTreasuryAnimations(), "Treasury Motion", "Allow lightweight animated shimmer/glitch accents; disable for reduced motion or lower GPU use."),
                     Preference.PreferenceItem.TextPreference("Apply Treasury showcase preset", "Enable the Aurora Prime, Core Melt, Weeping Void, and Crimson frame showcase combination.", onClick = { preferences.applyPreset("treasury") }),
                     Preference.PreferenceItem.TextPreference("Disable all manga Treasury visuals", "Return manga cards and title surfaces to the normal Komikku presentation.", onClick = {
+                        preferences.mangaTreasuryTheme().set(MangaTreasuryVisuals.NONE)
                         preferences.mangaTreasuryAura().set(MangaTreasuryVisuals.NONE)
                         preferences.mangaTreasuryBackground().set(MangaTreasuryVisuals.NONE)
                         preferences.mangaTreasuryFrame().set(MangaTreasuryVisuals.NONE)
